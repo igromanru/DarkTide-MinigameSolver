@@ -16,7 +16,7 @@ mod:hook_safe(CLASS.PlayerCharacterStateMinigame, "_update_input", function(self
     if self._minigame_extension then
         mod:debug("_minigame: %s", tostring(self._minigame_extension._minigame))
     end
-    if self._minigame_extension and self._minigame_extension._minigame and self._minigame_extension._minigame:is_on_target(t) then
+    if self._minigame_extension and self._minigame_extension._minigame and mod:get(SettingNames.DecodeSolver) and self._minigame_extension._minigame:is_on_target(t) then
         self._minigame_extension:action(self._minigame_extension._action_held ~= true, t)
     end
     mod:debug("--------------------")
