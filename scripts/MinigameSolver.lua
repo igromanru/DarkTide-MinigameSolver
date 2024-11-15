@@ -2,22 +2,27 @@ local mod = get_mod("MinigameSolver")
 
 local SettingNames = mod:io_dofile("MinigameSolver/scripts/setting_names")
 
--- mod:hook_safe(CLASS.MinigameDecodeSymbolsView, "_draw_cursor", function(self, widgets_by_name, decode_start_time, on_target, gameplay_time)
--- 	if on_target then
---         mod:debug("--- [MinigameDecodeSymbolsView._draw_cursor] ---")
---         mod:debug("--------------------")
---     end
--- end)
+local decode_on_taget = false
 
-mod:hook_safe(CLASS.PlayerCharacterStateMinigame, "_update_input", function(self, t)
-	mod:debug("--- [PlayerCharacterStateMinigame._update_input] ---")
-    mod:debug("time: %f", t)
-    mod:debug("_minigame_extension: %s", tostring(self._minigame_extension))
-    if self._minigame_extension then
-        mod:debug("_minigame: %s", tostring(self._minigame_extension._minigame))
+local cooldown = 0.0
+function mod.update(dt)
+    if cooldown > 0 then
+        cooldown = cooldown - dt
     end
-    if self._minigame_extension and self._minigame_extension._minigame and mod:get(SettingNames.DecodeSolver) and self._minigame_extension._minigame:is_on_target(t) then
-        self._minigame_extension:action(self._minigame_extension._action_held ~= true, t)
-    end
+end
+
+mod:hook_safe(CLASS.MinigameDecodeSymbolsView, "_draw_cursor", function(self, widgets_by_name, decode_start_time, on_target, gameplay_time)
+	mod:debug("--- [MinigameDecodeSymbolsView._draw_cursor] ---")
+    decode_on_taget = on_target
     mod:debug("--------------------")
 end)
+
+mod:hook("InputService", "_get", function(func, self, action_name)
+    if cooldown <= 0 and decode_on_taget and action_name == "action_one_hold" then
+        cooldown = 0.05
+        decode_on_taget = false
+        return true 
+    end
+    return func(self, action_name)
+end)
+
